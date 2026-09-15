@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clash of Champions — Digital Vault Lock Arena</title>
+<style>
+:root{
+  --bg:#080b12;--bg2:#0e131c;--panel:#121923;--panel2:#171f2b;
+  --line:#2b3544;--line2:#3a4657;--text:#f7f8fa;--muted:#98a4b5;
+  --blue:#1e8cff;--blue2:#54b0ff;--gold:#f4c84d;--red:#ff4d55;--green:#42d69b;
+  --shadow:0 16px 45px rgba(0,0,0,.38)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--text);
+background:radial-gradient(circle at 80% 0%,rgba(30,140,255,.14),transparent 30%),linear-gradient(145deg,#070a10,#0b1018 55%,#080b11)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;background-image:repeating-linear-gradient(135deg,#fff 0,#fff 1px,transparent 1px,transparent 9px)}
+button,input,textarea,select{font:inherit}button{cursor:pointer}.app{min-height:100vh;display:flex;flex-direction:column}main{flex:1}
+.screen{display:none;min-height:calc(100vh - 76px);padding:28px}.screen.active{display:block}.container{max-width:1280px;margin:auto}
+header.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:3px solid var(--blue);background:#090d14;position:sticky;top:0;z-index:20}
+.brand{font-weight:1000;letter-spacing:.055em;font-size:17px;font-style:italic;text-transform:uppercase}.brand span{color:var(--blue)}
+.topbar .subtle{text-transform:uppercase;font-size:12px;font-weight:800;letter-spacing:.14em}
+.hero{min-height:calc(100vh - 148px);display:grid;place-items:center;text-align:center}.hero-inner{max-width:900px}
+.eyebrow{color:var(--blue2);font-weight:900;letter-spacing:.22em;font-size:12px;text-transform:uppercase}
+h1{font-size:clamp(46px,8vw,94px);line-height:.86;margin:17px 0 12px;letter-spacing:-.055em;font-weight:1000;font-style:italic;text-shadow:5px 5px 0 rgba(30,140,255,.10)}
+h2{font-size:clamp(28px,4vw,46px);line-height:.95;margin:0 0 8px;font-weight:1000;font-style:italic;text-transform:uppercase;letter-spacing:-.025em}
+h3{margin:0 0 10px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}.hero p{font-size:18px;color:var(--muted)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:28px 0}
+.btn{border:1px solid var(--line2);border-radius:5px;padding:12px 18px;background:linear-gradient(#18222f,#101721);color:var(--text);text-transform:uppercase;font-weight:900;letter-spacing:.035em;transition:.14s;box-shadow:0 5px 0 #06080c}
+.btn:hover{border-color:var(--blue);transform:translateY(-2px)}.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #06080c}
+.btn.primary{background:linear-gradient(180deg,#2698ff,#0869c9);border-color:#54b0ff}.btn.gold{background:linear-gradient(180deg,#f7d665,#c99524);border-color:#ffe28a;color:#16120a}.btn.danger{border-color:#a53e46;color:#ffc8cc}.btn.small{padding:8px 11px;font-size:12px}
+.notice{border:1px solid var(--line2);border-left:4px solid var(--blue);background:linear-gradient(90deg,#111a25,#0c121b);padding:18px;border-radius:5px;text-align:left;box-shadow:var(--shadow)}
+.subtle{color:var(--muted)}.grid{display:grid;gap:16px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.panel{background:linear-gradient(145deg,#151d28,#0e141d);border:1px solid var(--line);border-radius:6px;padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.panel:before{content:"";position:absolute;left:0;top:0;width:70px;height:3px;background:var(--blue)}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+input,textarea,select{width:100%;background:#080d14;color:var(--text);border:1px solid var(--line2);border-radius:4px;padding:12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(30,140,255,.12)}textarea{min-height:280px;resize:vertical}.field{margin-bottom:15px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:3px;padding:6px 10px;font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase}.badge.ok{color:var(--green);border-color:#246d54}.badge.warn{color:#ffe09b;border-color:#725b2a}
+.preview{min-height:130px;border:1px dashed #3b4b5e;border-radius:4px;padding:14px;color:var(--muted);background:#0a1018}
+.team-fields{display:grid;gap:10px}.team-row{display:grid;grid-template-columns:70px 1fr;gap:10px;align-items:center}.team-row span{font-weight:1000;color:var(--blue2);font-style:italic;text-transform:uppercase}
+.arena-screen{padding:14px}.arena-head{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.timer{font-variant-numeric:tabular-nums;font-size:clamp(30px,4vw,48px);font-weight:1000;letter-spacing:.03em;color:#fff;min-width:125px;text-align:center;background:#05080d;border:2px solid var(--line2);padding:7px 12px;border-radius:4px}
+#arenaStatus{font-weight:900;color:var(--green);letter-spacing:.12em}
+.scoreboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px;margin-bottom:14px}
+.score-card{min-width:130px;border:1px solid var(--line);border-top:3px solid var(--blue);background:linear-gradient(145deg,#17212d,#0e141d);padding:12px 14px;border-radius:4px}
+.score-card .name{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;font-weight:900}.score-card .score{font-size:28px;font-weight:1000;line-height:1.05;margin-top:3px;font-style:italic}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}
+.vault{min-height:112px;border:1px solid #354356;border-radius:4px;background:linear-gradient(145deg,rgba(30,140,255,.08),transparent 50%),linear-gradient(160deg,#182332,#0d141d);color:var(--text);padding:14px;text-align:left;transition:.14s;position:relative;overflow:hidden}
+.vault.level-easy:before{background:#32d36f}.vault.level-medium:before{background:#ffd43b}.vault.level-hard:before{background:#a855f7}.vault.level-easy{border-color:rgba(50,211,111,.34)}.vault.level-medium{border-color:rgba(255,212,59,.34)}.vault.level-hard{border-color:rgba(168,85,247,.38)}.vault.level-easy:hover{border-color:#32d36f}.vault.level-medium:hover{border-color:#ffd43b}.vault.level-hard:hover{border-color:#a855f7}
+.level-chip{display:inline-flex;margin-top:7px;padding:4px 8px;border-radius:999px;font-size:9px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase}.level-chip.easy{color:#8dffb5;background:rgba(50,211,111,.1);border:1px solid rgba(50,211,111,.35)}.level-chip.medium{color:#ffe98a;background:rgba(255,212,59,.1);border:1px solid rgba(255,212,59,.35)}.level-chip.hard{color:#d9b3ff;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.35)}
+.vault:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}.vault:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 9px 25px rgba(0,0,0,.3),0 0 18px rgba(30,140,255,.1)}
+.vault .num{font-size:25px;font-weight:1000;font-style:italic}.vault .pts{font-size:14px;color:var(--gold);font-weight:1000}.vault .level{font-size:10px;color:var(--muted);margin-top:7px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
+.vault.locked{opacity:.46;cursor:not-allowed;border-color:#46505d;background:linear-gradient(145deg,#15191f,#0d1116)}.vault.locked:before{opacity:.9}.vault.locked:hover{box-shadow:none;border-color:#46505d;transform:none}
+.lock{position:absolute;right:9px;top:9px;font-size:10px;color:var(--green);font-weight:1000;letter-spacing:.05em}
+.overlay{position:fixed;inset:0;background:rgba(2,5,9,.84);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.overlay.open{display:flex}
+.modal{width:min(520px,100%);background:#111923;border:1px solid #39485b;border-top:4px solid var(--blue);border-radius:5px;padding:22px;box-shadow:0 25px 80px rgba(0,0,0,.6)}
+.modal-head{display:flex;justify-content:space-between;gap:12px}.modal h2{font-size:34px}
+.feedback{margin:14px 0;padding:13px;border-radius:4px;display:none;font-weight:900;text-transform:uppercase}.feedback.show{display:block}.feedback.bad{background:#35171d;border:1px solid #8c3d48;color:#ffd5db}.feedback.good{background:#12352b;border:1px solid #2e765f;color:#caffea}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.keypad button{padding:11px;border:1px solid var(--line2);border-radius:4px;background:#131e2a;color:white;font-weight:900}.keypad button:hover{border-color:var(--blue);background:#172b41}
+.log{max-height:260px;overflow:auto;background:#070b11;border:1px solid var(--line);border-radius:4px;padding:10px;font:12px/1.6 ui-monospace,SFMono-Regular,monospace}.log div{border-bottom:1px solid rgba(255,255,255,.05);padding:3px 0}
+.leaderboard{display:grid;gap:8px;margin:18px 0}.rank{display:grid;grid-template-columns:50px 1fr auto;gap:10px;align-items:center;padding:14px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:4px;background:var(--panel)}.rank:first-child{border-left-color:var(--gold);border-color:#725e2d}.rank .place{font-size:21px;font-weight:1000;color:var(--gold);font-style:italic}.rank .score{font-weight:1000;font-size:21px}
+.empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:4px}hr{border:0;border-top:1px solid var(--line);margin:20px 0}
+.resume-card{margin:24px auto 0;max-width:760px;border:1px solid #31506e;border-left:5px solid var(--blue);background:linear-gradient(135deg,rgba(30,140,255,.14),#0c131d 55%,#0a1018);padding:16px;text-align:left;border-radius:5px;box-shadow:var(--shadow)}
+.resume-card .resume-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.resume-card .resume-name{font-size:18px;font-weight:1000;font-style:italic;text-transform:uppercase}.resume-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.resume-meta span{border:1px solid var(--line2);padding:5px 8px;border-radius:3px;font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase}
+.history-list{display:grid;gap:10px;max-height:65vh;overflow:auto;padding-right:2px}.history-item{border:1px solid var(--line);border-left:4px solid var(--blue);background:linear-gradient(145deg,#151f2b,#0c121a);padding:14px;border-radius:4px}.history-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.history-name{font-weight:1000;font-size:16px;font-style:italic;text-transform:uppercase}.history-date{font-size:11px;color:var(--muted);white-space:nowrap}.history-winner{margin-top:7px;color:var(--gold);font-weight:900}.history-teams{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.history-team{font-size:11px;padding:5px 7px;background:#080d14;border:1px solid var(--line);border-radius:3px;color:#dce5ef}.history-team strong{color:#fff}.history-empty{padding:40px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:4px}
+
+footer{border-top:1px solid var(--line);padding:18px 28px;text-align:center;color:#778497;font-size:11px;line-height:1.7;text-transform:uppercase;letter-spacing:.04em;background:#070a0f}
+.match-strip{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:#0b1119;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:4px}.match-strip .subtle{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.pin-input{font-size:24px;text-align:center;letter-spacing:.35em;font-weight:900}.teacher-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.teacher-tab{border:1px solid var(--line2);background:#0b1119;color:#dce5ef;padding:10px 8px;border-radius:4px;font-weight:900;text-transform:uppercase;font-size:11px}.teacher-tab.active{background:#116fc3;border-color:#54b0ff}.teacher-card{border:1px solid var(--line);background:#0b1119;border-radius:4px;padding:14px;margin-bottom:10px}.teacher-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpi{padding:12px;border:1px solid var(--line);background:#101923;border-radius:4px}.kpi b{display:block;font-size:22px}.qwerty{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}.qwerty button{min-height:38px;border:1px solid var(--line2);border-radius:4px;background:#101a25;color:#fff;font-weight:900;font-size:13px}.qwerty button:hover{border-color:var(--blue);background:#17314a}.qwide{grid-column:span 2}.qspace{grid-column:span 5}.qwerty .action{font-size:11px}.podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;align-items:end;gap:10px;margin:25px 0}.podium-place{background:linear-gradient(180deg,#182536,#0e151e);border:1px solid var(--line2);border-radius:5px;text-align:center;padding:18px 10px}.podium-place.first{min-height:190px;border-color:var(--gold);box-shadow:0 0 25px rgba(244,200,77,.08)}.podium-place.second{min-height:155px}.podium-place.third{min-height:130px}.podium-place .medal{font-size:30px}.podium-place .pname{font-weight:1000;font-style:italic;text-transform:uppercase;margin-top:8px}.podium-place .pscore{font-size:28px;font-weight:1000;color:var(--gold);margin-top:5px}@media(max-width:650px){.teacher-tabs{grid-template-columns:repeat(2,1fr)}.qwerty{grid-template-columns:repeat(6,1fr)}.qwide,.qspace{grid-column:span 2}.podium{grid-template-columns:1fr}.podium-place.first,.podium-place.second,.podium-place.third{min-height:0}.arena-head{grid-template-columns:1fr}.timer{justify-self:start}}
+@media(max-width:850px){.two,.three{grid-template-columns:1fr}.arena-head{grid-template-columns:1fr auto}.arena-head .actions{grid-column:1/-1}.screen{padding:18px}}
+@media(max-width:520px){header.topbar{padding:0 15px;height:68px}header.topbar .subtle{display:none}.screen{padding:12px}.hero{min-height:calc(100vh - 115px)}.vault-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vault{min-height:100px;padding:11px}.scoreboard{grid-template-columns:repeat(2,1fr)}}
+
+/* --- Championship refinements: touch keyboard, F1 podium, live Local Storage --- */
+.qwerty-wrap{margin-top:12px;padding:12px;border:1px solid #30475d;border-radius:16px;background:linear-gradient(145deg,rgba(30,140,255,.09),rgba(7,11,18,.96));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 12px 28px rgba(0,0,0,.28)}
+.qwerty-wrap .qwerty-row{max-width:1050px;margin-left:auto;margin-right:auto}
+.qwerty-row{display:flex;gap:5px;margin:5px 0;justify-content:center}
+.qkey{flex:1;min-width:0;height:44px;border:1px solid var(--line2);border-radius:7px;background:linear-gradient(#1a2634,#101822);color:#fff;font-weight:900;box-shadow:0 2px 0 #05080c}
+.qkey:hover{border-color:var(--blue2);background:linear-gradient(180deg,#23364b,#142334);box-shadow:0 3px 0 #05080c,0 0 12px rgba(30,140,255,.12)}
+.qkey:active{transform:translateY(2px);box-shadow:0 0 0 #05080c,0 0 8px rgba(30,140,255,.2)}
+.qkey{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;border-radius:12px;background:radial-gradient(circle at 50% 12%,rgba(84,176,255,.22),transparent 48%),linear-gradient(180deg,#1c2d40 0%,#101a26 72%);border-color:#40556b;box-shadow:0 4px 0 #05080c,0 7px 14px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08);font-size:14px;letter-spacing:.02em}
+.qkey::after{content:"";display:block;height:3px;width:42%;margin:5px auto 0;border-radius:99px;background:rgba(84,176,255,.28)}
+.qkey.action{flex:1.55;font-size:11px}.qkey.space{flex:5}.qkey.shift{flex:1.35}.qkey.active{background:linear-gradient(#2698ff,#0869c9);border-color:#67b8ff}
+.keyboard-mode{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px}
+.keyboard-mode .hint{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.podium{display:grid;grid-template-columns:1fr 1.18fr 1fr;grid-template-rows:1fr;align-items:end;gap:18px;min-height:430px;padding:48px 10px 0}
+.podium-place{position:relative;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;min-height:170px!important;height:170px;overflow:visible;padding:52px 10px 0;border:1px solid #3a4b5e;border-bottom:0;border-radius:7px 7px 0 0;background:linear-gradient(180deg,#1b2b3c 0%,#0e151e 82%);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 -10px 24px rgba(0,0,0,.12)}
+.podium-place.first{grid-column:2;grid-row:1;border-color:var(--gold);background:linear-gradient(180deg,rgba(244,200,77,.16),#111923 78%);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 -14px 30px rgba(244,200,77,.08);z-index:2}
+.podium-place.second{grid-column:1;grid-row:1}
+.podium-place.third{grid-column:3;grid-row:1}
+.podium-place .medal{position:absolute;top:-46px;left:50%;transform:translateX(-50%);font-size:34px;line-height:1;filter:drop-shadow(0 5px 5px rgba(0,0,0,.4));z-index:4}
+.podium-place .pname{font-weight:1000;font-style:italic;text-transform:uppercase;text-align:center;font-size:17px;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium-place .pscore{font-size:32px;font-weight:1000;color:var(--gold);margin-top:8px;line-height:1}
+.podium-place .subtle{font-size:11px;margin-top:5px}
+.podium-place .podium-base{position:absolute;left:-1px;right:-1px;bottom:0;margin:0;padding:11px 5px 12px;background:linear-gradient(#24364a,#111923);border-top:2px solid var(--blue);font-size:11px;font-weight:1000;letter-spacing:.08em;text-align:center;border-radius:0 0 7px 7px}
+.podium-place.first .podium-base{border-top-color:var(--gold);font-size:13px;background:linear-gradient(#3b3320,#17140d)}
+@media(max-width:650px){.podium{grid-template-columns:1fr;grid-template-rows:auto;min-height:0;padding-top:55px}.podium-place.first,.podium-place.second,.podium-place.third{grid-column:auto;grid-row:auto}.podium-place{height:170px!important}.qkey{height:42px;font-size:12px}.qkey.action{font-size:10px}.qwerty-wrap{padding:8px;border-radius:14px}.qwerty-row{gap:4px}.qkey{border-radius:10px}}
+.factory-card{margin:22px auto 0;max-width:760px;border:1px solid #6d343c;border-left:5px solid var(--red);background:linear-gradient(135deg,rgba(255,77,85,.08),#0b1119 65%);padding:14px;text-align:left;border-radius:5px}.question-room{display:grid;gap:8px;max-height:52vh;overflow:auto}.question-row{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:start;border:1px solid var(--line);border-left:3px solid var(--blue);background:#0a1018;padding:10px;border-radius:4px}.question-num{font-weight:1000;color:var(--blue2);font-style:italic}.question-text{line-height:1.45}.question-meta{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;white-space:nowrap}.storage-live{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand">CLASH <span>OF</span> CHAMPIONS</div>
+  <div class="subtle">Digital Vault Lock Arena</div>
+</header>
+
+<main>
+<section id="home" class="screen active">
+  <div class="container hero"><div class="hero-inner">
+    <div class="eyebrow">ACADEMIC COMPETITION / OFFLINE ENGINE</div>
+    <h1>CLASH OF<br>CHAMPIONS</h1>
+    <p>Digital Vault Lock Arena</p>
+    <p class="subtle">Educational Game Template</p>
+    <div id="homeResume"></div>
+    <div class="actions">
+      <button id="continueBtn" class="btn primary" onclick="continueGame()" style="display:none">▶ CONTINUE GAME</button>
+      <button class="btn gold" onclick="beginNewGame()">＋ NEW GAME</button>
+      <button class="btn" onclick="showScreen('guru')">👨‍🏫 GURU ROOM</button>
+      <button class="btn" onclick="showHistory()">📜 HISTORY</button>
+      <button class="btn danger" onclick="factoryReset()">↻ REFRESH FROM ZERO</button>
+    </div>
+    <div class="notice"><strong>FREE ATTEMPT + PERMANENT VAULT LOCK</strong><br><span class="subtle">Salah = Vault tetap terbuka. Benar = Vault terkunci permanen dan poin masuk ke tim.</span></div>
+  </div></div>
+</section>
+
+<section id="guru" class="screen">
+  <div class="container">
+    <div class="toolbar"><div><h2>GURU ROOM</h2><div class="subtle">Question Bank & engine preparation</div></div><button class="btn" onclick="showScreen('home')">← MENU</button></div>
+    <div class="grid two">
+      <div class="panel">
+        <h3>Question Bank</h3><p class="subtle">Versi engine ini sengaja belum menetapkan template soal final.</p>
+        <div class="field"><label>PASTE TEMPLATE SOAL</label><textarea id="templateInput" placeholder="Tekan lama di area ini → pilih Tempel. Atau gunakan tombol TEMPEL dari clipboard."></textarea><div class="actions" style="justify-content:flex-start;margin:8px 0 0"><button class="btn small" onclick="pasteTemplateFromClipboard()">📋 TEMPEL DARI CLIPBOARD</button></div></div>
+        <div class="actions" style="justify-content:flex-start;margin:10px 0">
+          <button class="btn primary" onclick="readTemplate()">READ TEMPLATE</button>
+          <button class="btn" onclick="validateBank()">VALIDATE</button>
+          <button class="btn gold" onclick="generateVaults()">GENERATE VAULT</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>IMPORT PREVIEW</h3>
+        <div id="preview" class="preview">Belum ada data yang dibaca.</div>
+        <hr>
+        <h3>Architecture</h3>
+        <p class="subtle">Question Bank → Worksheet untuk siswa + Arena Vault untuk proyektor.</p>
+        <p><span class="badge">Mudah · 100 PTS</span> <span class="badge">Sedang · 200 PTS</span> <span class="badge">Sulit · 300 PTS</span></p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="toolbar"><div><h3 style="margin:0">TEACHER CONTROL CENTER</h3><span class="subtle">Menu guru sebelum pertandingan dimulai</span></div><span class="badge">OFFLINE CONTROL</span></div>
+      <div class="teacher-tabs" id="preTeacherTabs">
+        <button class="teacher-tab active" onclick="preTeacherTab('dashboard',this)">Dashboard</button>
+        <button class="teacher-tab" onclick="preTeacherTab('answer',this)">Answer Key</button>
+        <button class="teacher-tab" onclick="preTeacherTab('log',this)">Event Log</button>
+        <button class="teacher-tab" onclick="preTeacherTab('questions',this)">Room Soal</button>
+        <button class="teacher-tab" onclick="preTeacherTab('worksheet',this)">Worksheet</button>
+        <button class="teacher-tab" onclick="preTeacherTab('settings',this)">Settings</button><button class="teacher-tab" onclick="preTeacherTab('history',this)">History</button>
+      </div>
+      <div id="preTeacherContent"></div>
+    </div>
+  </div>
+</section>
+
+<section id="setup" class="screen">
+  <div class="container">
+    <div class="toolbar"><div><h2>SETUP GAME</h2><div class="subtle">Configure the classroom match</div></div><button class="btn" onclick="showScreen('home')">← MENU</button></div>
+    <div class="grid two">
+      <div class="panel">
+        <div class="field"><label>NAMA GAME / MATERI</label><input id="gameName" value="Clash of Champions"></div>
+        <div class="field"><label>DURASI (MENIT)</label><input id="duration" type="number" min="1" max="600" value="30"></div>
+        <div class="field"><label>JUMLAH TIM (2–10)</label><select id="teamCount" onchange="renderTeamInputs()"><option value="2">2 Tim</option><option value="3">3 Tim</option><option value="4" selected>4 Tim</option><option value="5">5 Tim</option><option value="6">6 Tim</option><option value="7">7 Tim</option><option value="8">8 Tim</option><option value="9">9 Tim</option><option value="10">10 Tim</option></select></div>
+      </div>
+      <div class="panel">
+        <h3>NAMA TIM</h3><div id="teamInputs" class="team-fields"></div>
+        <div class="actions" style="justify-content:flex-start;margin-bottom:0"><button class="btn primary" onclick="startGame()">MULAI ARENA</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="arena" class="screen arena-screen">
+  <div class="container" style="max-width:1500px">
+    <div class="arena-head">
+      <div><h2 id="arenaTitle">CLASH OF CHAMPIONS</h2><div class="subtle">Digital Vault Lock Arena · <span id="arenaStatus">RUNNING</span></div></div>
+      <div class="timer" id="timer">30:00</div>
+      <div class="actions" style="margin:0;justify-content:flex-end">
+        <button id="pauseBtn" class="btn" onclick="togglePause()">⏸ PAUSE</button>
+        <button class="btn" onclick="openTeacher()">🔑 GURU</button>
+        <button class="btn danger" onclick="confirmEndGame()">■ END GAME</button>
+      </div>
+    </div>
+    <div class="match-strip"><span class="badge">VAULT LOCK SYSTEM</span><span id="vaultProgress" class="subtle">0 LOCKED</span><span class="subtle">Scores disimpan untuk hasil akhir</span></div>
+    <div id="vaultGrid" class="vault-grid"></div>
+  </div>
+</section>
+
+<section id="gameover" class="screen">
+  <div class="container" style="max-width:900px">
+    <div class="panel">
+      <div class="eyebrow">MATCH COMPLETE</div><h2>🏆 GAME OVER</h2><div id="gameoverReason" class="subtle"></div>
+      <div id="finalBoard" class="leaderboard"></div>
+      <div id="finalStats" class="notice"></div>
+      <div class="actions">
+        <button class="btn gold" onclick="beginNewGame()">＋ NEW GAME</button>
+        <button class="btn" onclick="showHistory()">📜 HISTORY</button>
+        <button class="btn primary" onclick="showScreen('home')">MENU UTAMA</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>© 2026 Arensa Akbar Libi<br>Clash of Champions: Digital Vault Lock Arena<br>Educational Game Template</footer>
+</div>
+
+<div id="historyModal" class="overlay" onclick="if(event.target===this)closeHistory()">
+ <div class="modal" style="width:min(900px,100%)">
+  <div class="modal-head"><div><div class="eyebrow">MATCH ARCHIVE</div><h2>HISTORY</h2><div class="subtle">30 pertandingan terakhir · tersimpan di perangkat ini</div></div><button class="btn small" onclick="closeHistory()">✕</button></div><hr>
+  <div id="historyContent"></div>
+  <div class="actions" style="justify-content:flex-end;margin-bottom:0"><button class="btn" onclick="closeHistory()">TUTUP</button></div>
+ </div>
+</div>
+
+<div id="vaultModal" class="overlay" onclick="if(event.target===this)closeVault()">
+  <div class="modal">
+    <div class="modal-head"><div><div class="eyebrow">DIGITAL VAULT</div><h2 id="modalVault">VAULT #01</h2><div id="modalPoints" class="subtle">100 POINTS</div></div><button class="btn small" onclick="closeVault()">✕</button></div>
+    <hr>
+    <div class="field"><label>PILIH TIM</label><select id="teamSelect"></select></div>
+    <div class="field"><label>PASSWORD / JAWABAN</label><input id="answerInput" autocomplete="off" onkeydown="if(event.key==='Enter')submitAnswer()"></div>
+    <div id="feedback" class="feedback"></div>
+    <div class="qwerty-wrap" aria-label="Keyboard QWERTY">
+      <div class="keyboard-mode"><span class="hint">Keyboard jawaban</span><button type="button" class="btn small" onclick="pasteFromClipboard()">📋 TEMPEL</button></div>
+      <div class="qwerty-row">
+        <button class="qkey" onclick="key('q')">Q</button><button class="qkey" onclick="key('w')">W</button><button class="qkey" onclick="key('e')">E</button><button class="qkey" onclick="key('r')">R</button><button class="qkey" onclick="key('t')">T</button><button class="qkey" onclick="key('y')">Y</button><button class="qkey" onclick="key('u')">U</button><button class="qkey" onclick="key('i')">I</button><button class="qkey" onclick="key('o')">O</button><button class="qkey" onclick="key('p')">P</button>
+      </div>
+      <div class="qwerty-row">
+        <button class="qkey" onclick="key('a')">A</button><button class="qkey" onclick="key('s')">S</button><button class="qkey" onclick="key('d')">D</button><button class="qkey" onclick="key('f')">F</button><button class="qkey" onclick="key('g')">G</button><button class="qkey" onclick="key('h')">H</button><button class="qkey" onclick="key('j')">J</button><button class="qkey" onclick="key('k')">K</button><button class="qkey" onclick="key('l')">L</button>
+      </div>
+      <div class="qwerty-row">
+        <button class="qkey shift" id="shiftKey" onclick="toggleShift()">⇧ SHIFT</button><button class="qkey" onclick="key('z')">Z</button><button class="qkey" onclick="key('x')">X</button><button class="qkey" onclick="key('c')">C</button><button class="qkey" onclick="key('v')">V</button><button class="qkey" onclick="key('b')">B</button><button class="qkey" onclick="key('n')">N</button><button class="qkey" onclick="key('m')">M</button><button class="qkey" onclick="key('.')">.</button><button class="qkey action" onclick="key('BACK')">⌫</button>
+      </div>
+      <div class="qwerty-row">
+        <button class="qkey action" onclick="key('CLEAR')">CLEAR</button><button class="qkey" onclick="key(',')">,</button><button class="qkey" onclick="key('-')">-</button><button class="qkey" onclick="key('1')">1</button><button class="qkey" onclick="key('2')">2</button><button class="qkey" onclick="key('3')">3</button><button class="qkey" onclick="key('4')">4</button><button class="qkey" onclick="key('5')">5</button><button class="qkey" onclick="key('6')">6</button><button class="qkey" onclick="key('7')">7</button>
+      </div>
+      <div class="qwerty-row">
+        <button class="qkey" onclick="key('8')">8</button><button class="qkey" onclick="key('9')">9</button><button class="qkey" onclick="key('0')">0</button><button class="qkey" onclick="key('/')">/</button><button class="qkey" onclick="key(':')">:</button><button class="qkey" onclick="key('('">(</button><button class="qkey" onclick="key(')')">)</button><button class="qkey" onclick="key('?')">?</button><button class="qkey space" onclick="key('SPACE')">SPACE</button><button class="qkey action" onclick="key('ENTER')">↵ ENTER</button>
+      </div>
+    </div>
+    <div class="actions" style="justify-content:flex-end;margin-bottom:0"><button class="btn" onclick="closeVault()">BATAL</button><button class="btn primary" onclick="submitAnswer()">SUBMIT</button></div>
+  </div>
+</div>
+
+<div id="pinModal" class="overlay" onclick="if(event.target===this)closePin()">
+ <div class="modal"><div class="modal-head"><div><div class="eyebrow">SECURE ACCESS</div><h2>GURU ACCESS</h2></div><button class="btn small" onclick="closePin()">✕</button></div><hr>
+  <div class="field"><label>PIN GURU</label><input id="pinInput" class="pin-input" type="password" inputmode="numeric" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter')confirmPin()"></div>
+  <div id="pinFeedback" class="feedback"></div>
+  <div class="actions" style="justify-content:flex-end;margin-bottom:0"><button class="btn" onclick="closePin()">BATAL</button><button class="btn primary" onclick="confirmPin()">KONFIRMASI</button></div>
+ </div>
+</div>
+
+<div id="teacherModal" class="overlay" onclick="if(event.target===this)closeTeacher()">
+ <div class="modal" style="width:min(850px,100%)"><div class="modal-head"><div><div class="eyebrow">COACH CONTROL CENTER</div><h2>GURU MENU</h2></div><button class="btn small" onclick="closeTeacher()">✕</button></div><hr>
+  <div class="teacher-tabs">
+   <button class="teacher-tab active" onclick="teacherTab('dashboard',this)">Dashboard</button>
+   <button class="teacher-tab" onclick="teacherTab('questions',this)">Room Soal</button>
+   <button class="teacher-tab" onclick="teacherTab('answer',this)">Answer Key</button>
+   <button class="teacher-tab" onclick="teacherTab('log',this)">Event Log</button>
+   <button class="teacher-tab" onclick="teacherTab('tools',this)">Game Tools</button><button class="teacher-tab" onclick="teacherTab('history',this)">History</button>
+  </div>
+  <div id="teacherContent"></div>
+ </div>
+</div>
+
+<script>
+/* =========================================================
+   CLASH OF CHAMPIONS — DIGITAL VAULT LOCK ARENA
+   Single-file offline engine. No external dependencies.
+   ========================================================= */
+
+const STORAGE = {
+  current: 'coc_current_game_v1',
+  history: 'coc_history_v1',
+  bank: 'coc_question_bank_v1'
+};
+const LEVEL_POINTS = { Mudah:100, Sedang:200, Sulit:300 };
+let state = null;
+let selectedVaultIndex = null;
+let timerHandle = null;
+let audioCtx = null;
+
+/* ---------- Screen Router ---------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+  if(id === 'setup') renderTeamInputs();
+  if(id === 'home') renderHomeState();
+}
+
+/* ---------- Setup ---------- */
+function renderTeamInputs(){
+  const select=document.getElementById('teamCount');
+  const n=Math.max(2,Math.min(10,parseInt(select.value,10)||4));
+  select.value=String(n);
+  const wrap=document.getElementById('teamInputs');
+  const previous=[...wrap.querySelectorAll('input')].map(x=>x.value);
+  wrap.innerHTML='';
+  for(let i=0;i<n;i++){
+    const row=document.createElement('div'); row.className='team-row';
+    const defaultName='Tim '+String.fromCharCode(65+i);
+    row.innerHTML='<span>Tim '+(i+1)+'</span><input id="team_'+i+'" value="'+escapeHtml(previous[i]||defaultName)+'" maxlength="40">';
+    wrap.appendChild(row);
+  }
+}
+
+/* ---------- Question Bank Architecture ---------- */
+async function pasteTemplateFromClipboard(){
+  const el=document.getElementById('templateInput');
+  try{
+    if(navigator.clipboard&&navigator.clipboard.readText){const t=await navigator.clipboard.readText();if(t){el.value=t;el.focus();return;}}
+    throw new Error('no clipboard');
+  }catch(e){el.focus();alert('Android: tekan lama area template lalu pilih "Tempel". Tombol ini membutuhkan izin clipboard dari browser.');}
+}
+function parseQuestionTemplate(text){
+  const blocks=text.split(/\[QUESTION\s+\d+\]/i).map(x=>x.trim()).filter(Boolean);
+  const result=[];
+  blocks.forEach(block=>{
+    const q=block.match(/Question\s*:\s*(.+)/i);
+    const a=block.match(/Answer\s*:\s*(.+)/i);
+    const l=block.match(/Level\s*:\s*(.+)/i);
+    if(q&&a&&l&&["Mudah","Sedang","Sulit"].includes(l[1].trim())){
+      result.push({question:q[1].trim(),answer:a[1].trim(),level:l[1].trim()});
+    }
+  });
+  return result;
+}
+function readTemplate(){
+  const data=parseQuestionTemplate(document.getElementById('templateInput').value.trim());
+  window.tempQuestionBank=data;
+  const total=data.reduce((s,x)=>s+(LEVEL_POINTS[x.level]||0),0);
+  document.getElementById('preview').innerHTML=data.length
+    ? '<span class="badge ok">READ OK</span><br><br><strong>'+data.length+' soal ditemukan</strong><br>Mudah: '+data.filter(x=>x.level==="Mudah").length+' · Sedang: '+data.filter(x=>x.level==="Sedang").length+' · Sulit: '+data.filter(x=>x.level==="Sulit").length+'<br>Total poin: '+total+'<br><br><span class="subtle">Siap divalidasi dan digenerate menjadi Vault.</span>'
+    : '<span class="badge warn">NO DATA</span><br><br>Tidak ada soal yang terbaca.';
+}
+function validateBank(){
+  const data=window.tempQuestionBank||[];
+  if(!data.length){alert("Belum ada soal yang valid. Klik READ TEMPLATE terlebih dahulu.");return}
+  localStorage.setItem(STORAGE.bank,JSON.stringify(data));
+  document.getElementById('preview').innerHTML='<span class="badge ok">VALID</span><br><br>Question Bank: <strong>'+data.length+' soal</strong><br>Status: <strong>SIAP GENERATE</strong>';
+  alert("Question Bank valid dan tersimpan.");
+}
+function generateVaults(){
+  const data=window.tempQuestionBank||loadBank();
+  if(!data.length){alert("Belum ada soal. Klik READ TEMPLATE terlebih dahulu.");return}
+  localStorage.setItem(STORAGE.bank,JSON.stringify(data));
+  alert(data.length+" Vault berhasil disiapkan. Sekarang masuk ke SETUP GAME.");
+}
+
+/* ---------- Game Creation ---------- */
+function startGame(){
+  const name=(document.getElementById('gameName').value||'Clash of Champions').trim();
+  const minutes=Math.max(1,Math.min(600,Number(document.getElementById('duration').value)||30));
+  const n=Math.max(2,Math.min(10,Number(document.getElementById('teamCount').value)||4));
+  const teams=[];
+  for(let i=0;i<n;i++) teams.push({id:'T'+(i+1),name:(document.getElementById('team_'+i)?.value||('Tim '+(i+1))).trim()||('Tim '+(i+1)),score:0});
+  const bank=loadBank();
+  if(!bank.length){
+    if(!confirm('Question Bank belum memiliki soal. Arena akan dimulai dengan 0 Vault sebagai engine dasar. Lanjutkan?')) return;
+  }
+  state={
+    version:2, gameId:((window.crypto&&typeof window.crypto.randomUUID==='function')?window.crypto.randomUUID():('game-'+Date.now()+'-'+Math.random().toString(36).slice(2))), gameName:name, durationSeconds:minutes*60, remainingSeconds:minutes*60,
+    paused:false, startedAt:new Date().toISOString(), endedAt:null, bankVersion:bank.length+'-'+bank.map(q=>q.question+'|'+q.answer+'|'+q.level).join('§').length,
+    teams, vaults:bank.map((q,i)=>({
+      id:'V'+String(i+1).padStart(3,'0'), number:i+1, level:q.level||'Mudah',
+      points:LEVEL_POINTS[q.level]||100, question:q.question||'', answer:q.answer||'',
+      locked:false, claimedBy:null, claimedAt:null
+    })),
+    eventLog:[]
+  };
+  addLog('Game dimulai.');
+  saveState(); renderArena(); showScreen('arena'); startTimer(); beep('start');
+}
+function loadBank(){
+  try{
+    const b=JSON.parse(localStorage.getItem(STORAGE.bank)||'[]');
+    return Array.isArray(b)?b:[];
+  }catch(e){return []}
+}
+
+/* ---------- Arena ---------- */
+function renderArena(){
+  if(!state)return;
+  document.getElementById('arenaTitle').textContent=state.gameName;
+  document.getElementById('arenaStatus').textContent=state.paused?'PAUSED':'RUNNING';
+  document.getElementById('pauseBtn').textContent=state.paused?'▶ LANJUT':'⏸ PAUSE';
+  document.getElementById('timer').textContent=formatTime(state.remainingSeconds);
+  const locked=state.vaults.filter(v=>v.locked).length;
+  const progress=document.getElementById('vaultProgress');
+  if(progress)progress.textContent=locked+' / '+state.vaults.length+' LOCKED';
+  const grid=document.getElementById('vaultGrid'); grid.innerHTML='';
+  state.vaults.forEach((v,i)=>{
+    const levelKey=v.level==='Mudah'?'easy':(v.level==='Sedang'?'medium':'hard');
+    const b=document.createElement('button'); b.className='vault level-'+levelKey+(v.locked?' locked':'');
+    b.disabled=v.locked || state.paused || !state.remainingSeconds;
+    b.innerHTML='<span class="num">#'+String(v.number).padStart(2,'0')+'</span><br><span class="pts">'+v.points+' PTS</span><div class="level-chip '+levelKey+'">'+escapeHtml(v.level)+'</div>'+(v.locked?'<span class="lock">✓ LOCKED</span>':'');
+    b.onclick=()=>openVault(i); grid.appendChild(b);
+  });
+}
+function openVault(index){
+  if(!state || state.paused || state.vaults[index]?.locked) return;
+  selectedVaultIndex=index;
+  const v=state.vaults[index];
+  document.getElementById('modalVault').textContent='VAULT #'+String(v.number).padStart(2,'0');
+  document.getElementById('modalPoints').textContent=v.points+' POINTS · '+v.level;
+  const select=document.getElementById('teamSelect'); select.innerHTML='';
+  state.teams.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;select.appendChild(o)});
+  document.getElementById('answerInput').value='';
+  setFeedback('', '');
+  document.getElementById('vaultModal').classList.add('open');
+  document.getElementById('answerInput').focus();
+  beep('open');
+}
+function closeVault(){selectedVaultIndex=null;document.getElementById('vaultModal').classList.remove('open')}
+function submitAnswer(){
+  if(selectedVaultIndex===null || !state || state.paused)return;
+  const v=state.vaults[selectedVaultIndex];
+  if(v.locked)return closeVault();
+  const team=state.teams.find(t=>t.id===document.getElementById('teamSelect').value);
+  const entered=normalizeAnswer(document.getElementById('answerInput').value);
+  const correct=normalizeAnswer(v.answer);
+  addLog(team.name+' membuka Vault #'+String(v.number).padStart(2,'0')+'.');
+  if(entered && entered===correct){
+    v.locked=true;v.claimedBy=team.id;v.claimedAt=new Date().toISOString();team.score+=v.points;
+    addLog(team.name+' berhasil membuka Vault #'+String(v.number).padStart(2,'0')+' (+'+v.points+').');
+    addLog('Vault #'+String(v.number).padStart(2,'0')+' terkunci permanen.');
+    setFeedback('BENAR!','good');beep('correct');saveState();renderArena();
+    setTimeout(()=>{closeVault();},900);
+  }else{
+    addLog(team.name+' salah pada Vault #'+String(v.number).padStart(2,'0')+'.');
+    setFeedback('SALAH — Vault tetap terbuka dan dapat dicoba lagi.','bad');beep('wrong');saveState();
+  }
+}
+function normalizeAnswer(v){
+  return String(v??'').trim().toLowerCase().replace(/\s+/g,' ');
+}
+function setFeedback(text,kind){
+  const el=document.getElementById('feedback');el.textContent=text;el.className='feedback'+(text?' show '+kind:'');
+}
+
+/* ---------- Timer ---------- */
+function startTimer(){
+  clearInterval(timerHandle);
+  timerHandle=setInterval(()=>{
+    if(!state || state.paused)return;
+    if(state.remainingSeconds>0){state.remainingSeconds--;document.getElementById('timer').textContent=formatTime(state.remainingSeconds);saveState()}
+    if(state.remainingSeconds<=0)endGame('Waktu habis.');
+    if(state.remainingSeconds%10===0)saveState();
+  },1000);
+}
+function togglePause(){
+  if(!state)return;
+  state.paused=!state.paused;
+  addLog(state.paused?'Game di-pause.':'Game dilanjutkan.');
+  saveState();renderArena();beep(state.paused?'pause':'resume');
+}
+function formatTime(s){s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+
+/* ---------- End Game & History ---------- */
+function confirmEndGame(){
+  if(!state || state.endedAt)return;
+  if(confirm('Akhiri pertandingan sekarang? Skor akan disimpan sebagai hasil akhir dan game tidak dapat dilanjutkan melalui Arena aktif.')) endGame('Pertandingan diakhiri oleh guru.');
+}
+function endGame(reason){
+  if(!state || state.endedAt)return;
+  clearInterval(timerHandle);state.remainingSeconds=Math.max(0,state.remainingSeconds);state.endedAt=new Date().toISOString();
+  state.paused=true;addLog('Game berakhir: '+reason);
+  saveHistory();
+  // Hasil akhir tetap dipakai untuk layar GAME OVER, tetapi game aktif dihapus
+  // agar saat browser dibuka lagi pertandingan yang sudah selesai tidak muncul sebagai CONTINUE.
+  localStorage.removeItem(STORAGE.current);
+  document.getElementById('gameoverReason').textContent=reason;
+  renderFinalBoard();showScreen('gameover');beep('gameover');
+}
+function renderFinalBoard(){
+  const sorted=[...state.teams].sort((a,b)=>b.score-a.score);
+  const top=sorted.slice(0,3);
+  const medals=['🥇','🥈','🥉'];
+  const classes=['first','second','third'];
+  const order=[1,0,2]; // P2, P1, P3 -> P1 is physically centered like an F1 podium
+  const board=document.getElementById('finalBoard');
+  board.className='podium';board.innerHTML='';
+  if(!top.length){board.innerHTML='<div class="empty">Belum ada hasil.</div>';return;}
+  const maxScore=Math.max(...top.map(t=>t.score),1);
+  order.forEach(i=>{
+    if(!top[i])return;
+    const t=top[i];
+    const r=document.createElement('div');r.className='podium-place '+classes[i];
+    // Tinggi batang benar-benar mengikuti perbandingan poin. Juara 1 selalu di tengah.
+    const baseHeight=170 + Math.round((t.score/maxScore)*250);
+    r.style.height=baseHeight+'px';
+    r.innerHTML='<div class="medal">'+medals[i]+'</div><div class="pname">'+escapeHtml(t.name)+(i===0?' · WINNER':'')+'</div><div class="pscore">'+t.score+'</div><div class="subtle">POINTS</div><div class="podium-base">POSITION '+(i+1)+'</div>';
+    board.appendChild(r);
+  });
+  const locked=state.vaults.filter(v=>v.locked).length;
+  document.getElementById('finalStats').innerHTML='<strong>HASIL AKHIR TERSIMPAN</strong><br>'+locked+' / '+state.vaults.length+' Vault terkunci · '+new Date(state.endedAt).toLocaleString('id-ID');
+}
+function saveHistory(){
+  if(!state)return;
+  const item={gameId:state.startedAt||new Date().toISOString(),gameName:state.gameName,date:state.endedAt||new Date().toISOString(),teams:state.teams.map(t=>({name:t.name,score:t.score})),finalScores:state.teams.map(t=>t.score),lockedVaults:state.vaults.filter(v=>v.locked).length,totalVaults:state.vaults.length};
+  let h=[];try{h=JSON.parse(localStorage.getItem(STORAGE.history)||'[]')}catch(e){}
+  if(h.some(x=>x.gameId===item.gameId))return;
+  h.unshift(item);localStorage.setItem(STORAGE.history,JSON.stringify(h.slice(0,30)));
+}
+function loadHistory(){
+  try{const h=JSON.parse(localStorage.getItem(STORAGE.history)||'[]');return Array.isArray(h)?h.slice(0,30):[]}catch(e){return []}
+}
+function showHistory(){
+  const h=loadHistory();
+  const c=document.getElementById('historyContent');
+  if(!h.length){
+    c.innerHTML='<div class="history-empty"><strong>BELUM ADA HISTORY</strong><br><span class="subtle">Hasil pertandingan akan otomatis masuk ke sini setelah END GAME.</span></div>';
+  }else{
+    c.innerHTML='<div class="history-list">'+h.slice(0,30).map((x,i)=>{
+      const teams=Array.isArray(x.teams)?x.teams:[];
+      const sorted=[...teams].sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0));
+      const winner=sorted[0];
+      return '<div class="history-item"><div class="history-head"><div><div class="history-name">#'+(i+1)+' · '+escapeHtml(x.gameName||'Clash of Champions')+'</div><div class="history-winner">🏆 '+(winner?escapeHtml(winner.name)+' · '+(Number(winner.score)||0)+' PTS':'Belum ada pemenang')+'</div></div><div class="history-date">'+new Date(x.date||Date.now()).toLocaleString('id-ID')+'</div></div><div class="resume-meta"><span>'+(Number(x.lockedVaults)||0)+' / '+(Number(x.totalVaults)||0)+' VAULT LOCKED</span><span>'+teams.length+' TIM</span></div><div class="history-teams">'+teams.map(t=>'<span class="history-team">'+escapeHtml(t.name)+' <strong>'+((Number(t.score)||0))+'</strong></span>').join('')+'</div></div>';
+    }).join('')+'</div>';
+  }
+  document.getElementById('historyModal').classList.add('open');
+}
+function closeHistory(){document.getElementById('historyModal').classList.remove('open')}
+
+/* ---------- Local Storage Persistence ---------- */
+function saveState(){
+  if(state && !state.endedAt)localStorage.setItem(STORAGE.current,JSON.stringify(state));
+  else localStorage.removeItem(STORAGE.current);
+}
+// Local Storage is the automatic persistence layer. Save once every second so a refresh/close
+// loses as little progress as possible.
+setInterval(()=>{if(state && !state.endedAt)saveState()},1000);
+function factoryReset(){
+  const ok=confirm('REFRESH FROM ZERO?\n\nIni akan menghapus CURRENT GAME, seluruh HISTORY, dan QUESTION BANK dari Clash of Champions pada browser ini. Setelah itu aplikasi kembali seperti baru.\n\nTindakan ini tidak dapat dibatalkan.');
+  if(!ok)return;
+  clearInterval(timerHandle);
+  state=null;selectedVaultIndex=null;window.tempQuestionBank=[];
+  localStorage.removeItem(STORAGE.current);
+  localStorage.removeItem(STORAGE.history);
+  localStorage.removeItem(STORAGE.bank);
+  const template=document.getElementById('templateInput'); if(template)template.value='';
+  const preview=document.getElementById('preview'); if(preview)preview.innerHTML='Belum ada data yang dibaca.';
+  closeVault();closeTeacher();closePin();closeHistory();
+  showScreen('home');renderHomeState();
+  alert('CLASH OF CHAMPIONS sudah di-refresh dari nol. Semua data lokal game ini telah dihapus.');
+}
+
+function renderQuestionRoom(target,bank,sourceLabel){
+  if(!bank.length){
+    target.innerHTML='<div class="teacher-card"><strong>ROOM SOAL KOSONG</strong><p class="subtle">Belum ada Question Bank. Masukkan template soal di panel Question Bank lalu READ TEMPLATE → VALIDATE.</p></div>';
+    return;
+  }
+  target.innerHTML='<div class="teacher-card"><div class="toolbar" style="margin-bottom:10px"><div><strong>ROOM SOAL</strong><div class="subtle">'+sourceLabel+' · '+bank.length+' soal · Vault dibuat otomatis sesuai urutan soal.</div></div><span class="badge ok"><span class="storage-live">●</span> LOCAL STORAGE</span></div><div class="question-room">'+bank.map((q,i)=>'<div class="question-row"><div class="question-num">#'+String(i+1).padStart(2,'0')+'</div><div class="question-text">'+escapeHtml(q.question||'')+'</div><div class="question-meta">'+escapeHtml(q.level||'Mudah')+' · '+(LEVEL_POINTS[q.level]||100)+' PTS</div></div>').join('')+'</div></div>';
+}
+function preTeacherTab(tab,btn){
+  document.querySelectorAll('#preTeacherTabs .teacher-tab').forEach(x=>x.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const c=document.getElementById('preTeacherContent');
+  const bank=loadBank();
+  if(tab==='dashboard'){
+    const total=bank.length, points=bank.reduce((s,x)=>s+(LEVEL_POINTS[x.level]||0),0);
+    c.innerHTML='<div class="teacher-kpis"><div class="kpi"><span class="subtle">QUESTION BANK</span><b>'+total+'</b></div><div class="kpi"><span class="subtle">TOTAL POINTS</span><b>'+points+'</b></div><div class="kpi"><span class="subtle">STORAGE</span><b style="font-size:16px" class="storage-live">● AUTO-SAVE</b></div></div><div class="teacher-card"><strong>CONTROL CENTER READY</strong><br><span class="subtle">Local Storage menyimpan Question Bank dan game aktif otomatis. Tidak perlu file backup.</span></div>';
+  }else if(tab==='questions'){
+    renderQuestionRoom(c,bank,'Question Bank terbaru');
+  }else if(tab==='answer'){
+    c.innerHTML='<div class="teacher-card"><strong>ANSWER KEY</strong><p class="subtle">Kunci dari Question Bank tersimpan lokal dan tidak ditampilkan di Arena.</p><div class="log">'+(bank.length?bank.map((x,i)=>'#'+String(i+1).padStart(2,'0')+' · '+escapeHtml(x.answer)+' · '+escapeHtml(x.level)+' · '+(LEVEL_POINTS[x.level]||100)+' pts').join('<br>'):'Belum ada Question Bank.')+'</div></div>';
+  }else if(tab==='log'){
+    c.innerHTML='<div class="teacher-card"><strong>EVENT LOG</strong><p class="subtle">Event pertandingan akan muncul setelah game dimulai.</p></div>';
+  }else if(tab==='worksheet'){
+    c.innerHTML='<div class="teacher-card"><strong>WORKSHEET OUTPUT</strong><p class="subtle">Question Bank → pertanyaan + kolom jawaban. Generator worksheet final dapat dikembangkan dari Room Soal ini.</p></div>';
+  }else if(tab==='history'){
+    c.innerHTML='<div class="teacher-card"><div class="toolbar"><div><strong>MATCH HISTORY</strong><div class="subtle">'+loadHistory().length+' / 30 pertandingan tersimpan di Local Storage.</div></div><button class="btn small" onclick="showHistory()">📜 BUKA HISTORY</button></div></div>';
+  }else{
+    c.innerHTML='<div class="teacher-card"><strong>GAME SETTINGS</strong><p class="subtle">Default scoring: Mudah 100 · Sedang 200 · Sulit 300. Jumlah tim: 2–10. PIN Guru default: 1234.</p><div class="actions" style="justify-content:flex-start"><button class="btn" onclick="showHistory()">📜 HISTORY</button><button class="btn danger" onclick="factoryReset()">↻ REFRESH FROM ZERO</button></div></div>';
+  }
+}
+
+/* ---------- Teacher Control Center ---------- */
+function openTeacher(){
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinFeedback').className='feedback';
+  document.getElementById('pinModal').classList.add('open');
+  setTimeout(()=>document.getElementById('pinInput').focus(),50);
+}
+function confirmPin(){
+  const pin=document.getElementById('pinInput').value;
+  if(pin==='1234'){
+    document.getElementById('pinModal').classList.remove('open');
+    document.getElementById('teacherModal').classList.add('open');
+    teacherTab('dashboard');
+  }else{
+    const f=document.getElementById('pinFeedback');f.textContent='PIN SALAH';f.className='feedback show bad';beep('wrong');
+  }
+}
+function closePin(){document.getElementById('pinModal').classList.remove('open')}
+function closeTeacher(){document.getElementById('teacherModal').classList.remove('open')}
+function teacherTab(tab,btn){
+  document.querySelectorAll('#teacherModal .teacher-tab').forEach(x=>x.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const c=document.getElementById('teacherContent');
+  if(tab==='dashboard'){
+    const locked=state?state.vaults.filter(v=>v.locked).length:0,total=state?state.vaults.length:0;
+    c.innerHTML=`<div class="teacher-kpis"><div class="kpi"><span class="subtle">VAULT</span><b>${locked}/${total}</b></div><div class="kpi"><span class="subtle">TIM</span><b>${state?state.teams.length:0}</b></div><div class="kpi"><span class="subtle">STORAGE</span><b class="storage-live" style="font-size:16px">● LIVE AUTO-SAVE</b></div></div><div class="teacher-card"><strong>${state?escapeHtml(state.gameName):'Belum ada game aktif'}</strong><br><span class="subtle">Game aktif disimpan ke Local Storage setiap detik. Tutup/refresh halaman dapat dilanjutkan dengan CONTINUE GAME.</span></div>`;
+  }else if(tab==='questions'){
+    const bank=state?state.vaults.map(v=>({question:v.question,level:v.level})):loadBank();
+    renderQuestionRoom(c,bank,state?'Soal yang sedang dimainkan':'Question Bank terbaru');
+  }else if(tab==='answer'){
+    c.innerHTML=`<div class="teacher-card"><strong>ANSWER KEY</strong><p class="subtle">Kunci jawaban hanya tersedia di ruang guru. ${state?state.vaults.length:0} Vault.</p><div class="log">${state?state.vaults.map(v=>'#'+String(v.number).padStart(2,'0')+' · '+escapeHtml(v.answer)+' · '+v.points+' pts').join('<br>'):'Belum ada game.'}</div></div>`;
+  }else if(tab==='log'){
+    c.innerHTML=`<div class="teacher-card"><strong>EVENT LOG</strong><div class="log">${state?.eventLog?.length?state.eventLog.map(x=>'<div>'+escapeHtml(x)+'</div>').join(''):'<div>Belum ada event.</div>'}</div></div>`;
+  }else if(tab==='history'){
+    const h=loadHistory();
+    c.innerHTML=`<div class="teacher-card"><div class="toolbar"><div><strong>MATCH HISTORY</strong><div class="subtle">${h.length} / 30 pertandingan tersimpan di Local Storage.</div></div><button class="btn small" onclick="showHistory()">📜 BUKA HISTORY</button></div>${h.length?'<div class="history-list">'+h.map((x,i)=>'<div class="history-item"><div class="history-name">#'+(i+1)+' · '+escapeHtml(x.gameName||'Clash of Champions')+'</div><div class="history-date">'+new Date(x.date||Date.now()).toLocaleString('id-ID')+'</div></div>').join('')+'</div>':'<div class="history-empty">Belum ada pertandingan selesai.</div>'}</div>`;
+  }else{
+    c.innerHTML=`<div class="teacher-card"><strong>GAME TOOLS</strong><p class="subtle">Tidak ada file Restore/JSON. Semua penyimpanan berjalan otomatis melalui Local Storage.</p><div class="actions" style="justify-content:flex-start"><button class="btn" onclick="showHistory()">📜 HISTORY</button><button class="btn danger" onclick="resetCurrentGame()">RESET CURRENT GAME</button><button class="btn danger" onclick="factoryReset()">↻ REFRESH FROM ZERO</button></div></div>`;
+  }
+}
+function resetCurrentGame(){
+  if(confirm('Hapus game aktif dan kembali ke menu? History dan Question Bank tetap aman.')){
+    clearInterval(timerHandle);state=null;localStorage.removeItem(STORAGE.current);closeTeacher();showScreen('home');renderHomeState();
+  }
+}
+function addLog(message){
+  if(!state)return;
+  const time=new Date().toLocaleTimeString('id-ID',{hour12:false});
+  state.eventLog=state.eventLog||[];state.eventLog.push('['+time+'] '+message);
+}
+
+/* ---------- Audio ---------- */
+function beep(type){
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    const map={start:[440,.08],open:[330,.06],correct:[660,.16],wrong:[180,.18],pause:[260,.08],resume:[520,.08],gameover:[120,.45]};
+    const [freq,dur]=map[type]||[440,.08],o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.045,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);
+    o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur+.02);
+  }catch(e){}
+}
+
+/* ---------- Adaptive Keypad ---------- */
+let keyboardShift=false;
+function key(v){
+  const input=document.getElementById('answerInput');
+  if(v==='CLEAR') input.value='';
+  else if(v==='BACK') input.value=input.value.slice(0,-1);
+  else if(v==='SPACE') input.value+=' ';
+  else if(v==='ENTER') submitAnswer();
+  else { const out=(keyboardShift && /^[a-z]$/.test(v))?v.toUpperCase():v; input.value+=out; if(keyboardShift) {keyboardShift=false; updateShiftKey();} }
+  input.focus();
+}
+function toggleShift(){keyboardShift=!keyboardShift;updateShiftKey();document.getElementById('answerInput').focus()}
+function updateShiftKey(){const b=document.getElementById('shiftKey');if(b)b.classList.toggle('active',keyboardShift)}
+async function pasteFromClipboard(){
+  const input=document.getElementById('answerInput');
+  try{
+    if(navigator.clipboard && navigator.clipboard.readText){
+      const text=await navigator.clipboard.readText();
+      if(text){input.value+=text;input.focus();return;}
+    }
+    throw new Error('clipboard unavailable');
+  }catch(e){
+    input.focus();
+    alert('Untuk Android, tekan lama kolom jawaban lalu pilih "Tempel". Jika browser memberi izin clipboard, tombol TEMPEL juga dapat digunakan.');
+  }
+}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+/* ---------- Home / Persistent Game Lifecycle ---------- */
+function getSavedCurrentGame(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE.current)||'null');
+    return saved && Array.isArray(saved.teams) && Array.isArray(saved.vaults) && !saved.endedAt ? saved : null;
+  }catch(e){return null}
+}
+function renderHomeState(){
+  const saved=getSavedCurrentGame();
+  const box=document.getElementById('homeResume');
+  const btn=document.getElementById('continueBtn');
+  if(!box||!btn)return;
+  if(saved){
+    state=saved;
+    const locked=saved.vaults.filter(v=>v.locked).length;
+    const score=saved.teams.reduce((sum,t)=>sum+(Number(t.score)||0),0);
+    box.innerHTML='<div class="resume-card"><div class="resume-title"><div><div class="eyebrow">ACTIVE MATCH FOUND</div><div class="resume-name">'+escapeHtml(saved.gameName||'Clash of Champions')+'</div></div><span class="badge ok">READY TO CONTINUE</span></div><div class="resume-meta"><span>'+saved.teams.length+' TIM</span><span>'+locked+' / '+saved.vaults.length+' VAULT LOCKED</span><span>'+formatTime(saved.remainingSeconds)+'</span><span>'+score+' TOTAL PTS</span></div></div>';
+    btn.style.display='inline-block';
+  }else{
+    if(state && state.endedAt)state=null;
+    box.innerHTML='';btn.style.display='none';
+  }
+}
+function continueGame(){
+  const saved=getSavedCurrentGame();
+  if(!saved){alert('Tidak ada game aktif untuk dilanjutkan.');renderHomeState();return;}
+  state=saved;renderArena();showScreen('arena');startTimer();
+}
+function beginNewGame(){
+  const saved=getSavedCurrentGame();
+  if(saved){
+    const choice=confirm('Masih ada game aktif: "'+(saved.gameName||'Clash of Champions')+'".\n\nOK = MULAI NEW GAME dan menutup game aktif.\nBATAL = tetap lanjutkan game lama.\n\nGame aktif yang belum di-END GAME tidak masuk History.');
+    if(!choice)return;
+  }
+  clearInterval(timerHandle);
+  state=null;selectedVaultIndex=null;localStorage.removeItem(STORAGE.current);
+  showScreen('setup');
+}
+
+/* ---------- Recovery ---------- */
+function recover(){
+  try{
+    const saved=getSavedCurrentGame();
+    if(saved)state=saved;
+    // Jangan langsung melempar pengguna ke Arena. Home menjadi titik pemulihan:
+    // pengguna memilih CONTINUE GAME atau NEW GAME.
+    showScreen('home');renderHomeState();
+  }catch(e){localStorage.removeItem(STORAGE.current);state=null;showScreen('home');renderHomeState()}
+}
+document.addEventListener('DOMContentLoaded',()=>{renderTeamInputs();preTeacherTab('dashboard',document.querySelector('#preTeacherTabs .teacher-tab'));recover()});
+window.addEventListener('beforeunload',()=>{if(state && !state.endedAt)saveState()});
+</script>
+</body>
+</html>
